@@ -1,0 +1,4 @@
+class EmptyModel (object):
+
+
+    pass
