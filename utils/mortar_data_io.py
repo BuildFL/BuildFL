@@ -1,47 +1,17 @@
 import time 
 import numpy as np 
 from sklearn.model_selection import train_test_split
-from utils.learning import calc_loss_RMSE
 
 test_Str = '2018-08-29 13:00:00+00:00,60.805,39.435,213.72,0.2,70'
 
 BUILDING_NAMES_MORTAR = [
     'arc',
-    #'brig', # corrupted data
-    # 'miwf', # corrupted data
+    # 'brig',
+    # 'miwf',
     'smoa',
     'vm3a',
-    'vmif' 
+    'vmif' # too much corrupted data
 ]
-
-def basic_evaluate_mortar(m):
-    _ , _, X_test, y_test = prepare_dataset_mortar()
-    y_pred = m.predict(X_test)
-    return calc_loss_RMSE(y_test, y_pred)
-    pass
-
-def prepare_dataset_mortar():
-    X_train_list = []
-    y_train_list = []
-
-    X_test_list = []
-    y_test_list = []
-    for b in BUILDING_NAMES_MORTAR:
-        X, y = form_dataset(b)
-        X_train, X_test, y_train, y_test = train_test_split(X, y,test_size = 0.2)
-
-        X_train_list.append(X_train)
-        y_train_list.append(y_train)
-        X_test_list.append(X_test)
-        y_test_list.append(y_test)
-        pass
-    X_test_global = np.concatenate(X_test_list)
-    y_test_global = np.concatenate(y_test_list)
-
-    X_train_global = np.concatenate(X_train_list)
-    y_train_global = np.concatenate(y_train_list)
-    return X_train_global, y_train_global, X_test_global, y_test_global
-    pass
 
 def load_dataset_mortar():
     X_train_dict = {}
@@ -53,7 +23,7 @@ def load_dataset_mortar():
     y_test_list = []
     for b in BUILDING_NAMES_MORTAR:
         X, y = form_dataset(b)
-        X_train, X_test, y_train, y_test = train_test_split(X, y,test_size = 0.2)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
         X_train_dict[b] = X_train 
         y_train_dict[b] = y_train 
         X_test_dict [b] = X_test
@@ -67,7 +37,7 @@ def load_dataset_mortar():
     return X_train_dict, y_train_dict, X_test_dict, y_test_dict, X_test_global, y_test_global
 
 
-def form_dataset(building_name):
+def form_dataset(building_name): # single building name 
     X_list = []
     y_list = []
 
@@ -81,9 +51,14 @@ def form_dataset(building_name):
             X_list.append(x)
             y_list.append(cop)
         pass
-    # Some building's COP is very small 
-    # Maybe caused by different units of the sensor  
+    # Some building's COP get very small 
+    # Caused by different units of the sensor
+    if building_name == 'brig':
+        y_list = [ i * 10 for i in y_list]
+    if building_name == 'miwf':
+        y_list = [ i * 100 for i in y_list]        
     return X_list, y_list
+    # pass
 
 def get_data_point(input_Str):
     # valid = True
@@ -94,10 +69,10 @@ def get_data_point(input_Str):
         supply_temp = float(data_list[2] )
         water_flow  = float(data_list[3])
         power       = float(data_list[4])
-        room_temp   = float(data_list[5]) # temp not use 
+        room_temp   = float(data_list[5])
         cooling_load =   (temperature_F_to_C(return_temp)  - temperature_F_to_C(supply_temp))  * water_flow * 0.42
         cop = cooling_load / (power * 100 )
-        each_x = [ cooling_load, water_flow, return_temp, supply_temp,  power, age]
+        each_x = [ age, return_temp, supply_temp, water_flow, power, room_temp]
     except:
         return [], -100 
     # data cleaning 
