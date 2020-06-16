@@ -90,6 +90,7 @@ def calc_loss_MAPE(reals, predictions):
     return np.mean(ratio_list)
     pass
 
+# for centralized mode 
 def train_model( X_train, y_train, model, **parameters):
     # print(parameters)
     assert type(model) == type('neural network')
@@ -146,7 +147,7 @@ def train_model_NN(X_train, y_train, **paramater_dict):
     # print('NN')
     import torch 
     use_cuda = torch.cuda.is_available()
-    lr = 0.01
+    lr = 0.001
     epoch = 2000
     if 'lr' in paramater_dict.keys():
         lr = paramater_dict['lr']
