@@ -1,6 +1,4 @@
-# Boosting Method 
-# 这里使用 boosting ，没有weight ajdusting 的过程 
-# 直接使用 上一轮的残差进行训练
+
 import time, random 
 from utils.learning import train_model, calc_loss_RMSE
 
