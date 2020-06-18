@@ -56,6 +56,12 @@ class BoostingModel(EnsembleModel):
         self.model_list = []
         pass
     
+    # use aggregate in boosting method 
+    def aggregate(self, input_model): # add one model into self. model list 
+        model_tmp = deepcopy(input_model)
+        self.model_list.append(model_tmp)
+        pass
+    
     # remove the last added model 
     def undo(self):
         self.model_list = self.model_list[: -1]

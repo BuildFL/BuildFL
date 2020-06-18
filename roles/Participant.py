@@ -12,7 +12,7 @@ from models.ensemble_learning import BoostingModel
 class participant(object):
 
     def __init__(self, ID,  data_source = 'mortar', building_name = 'vm3a' ,\
-                model = 'BT'):
+                model = 'BT', mini_batch_size = 0.4 ):
         # self.aggrate_method = aggrate_method
         # assert aggrate_method.lower() in ['ensemble', 'incremental', 'distributed'] # 这里之前写了个bug 
         # self.n_clusters = n_clusters
@@ -40,6 +40,7 @@ class participant(object):
 
         # get federated  model
         # self.has_global_models = False
+        self.model = model 
         
         # self evaluation result
         # self.baseline_evaluated = False
@@ -49,22 +50,27 @@ class participant(object):
 
         self.global_model = None 
         self.weak_estimator = None 
+
+        # mini batch size 
+        self.mini_batch_size = mini_batch_size
+        assert self.mini_batch_size > 0 and self.mini_batch_size < 1.0 
         pass
     
     # the participant train the model 
     # based on the existing global model 
     # when ensemble, use train a weak-estimator directly 
-    def train(self, model, **parameters):
-        if model in ['RF' , "Random Forest", 'random forest']:
+    # def local_train( self, model, **parameters)
+    def train(self, **parameters): # currently we don't use train(model, parameter), because model is stored in self.model 
+        if self.model in ['RF' ,'rf', "Random Forest", 'random forest']:
             
             pass
-        elif model in ['Ada', 'adaboost', 'Adaboost']:
+        elif self.model in ['Ada', 'ada', 'adaboost', 'Adaboost']:
             
             pass
-        elif model in ['BT', 'Boosting Tree', 'boosting tree']:
+        elif self.model in ['BT','bt', 'Boosting Tree', 'boosting tree']:
             
             pass
-        elif model in ['NN', 'nn', 'Neural network', 'neural network']:
+        elif self.model in ['NN', 'nn', 'Neural network', 'neural network']: # NN directly update global model 
             
             pass
         #  end training 
@@ -80,7 +86,11 @@ class participant(object):
         pass
 
     def update(self):
-        return deepcopy( self.weak_estimator )
+        if self.model in ['NN', 'nn', 'Neural network', 'neural network']:
+            return deepcopy( self.global_model )
+        else: 
+            return deepcopy( self.weak_estimator )
+        pass
         
 
     
