@@ -5,13 +5,18 @@ from copy import deepcopy
 # from utils.learning import incremental_clustering
 # from utils.learning import clustered_learning_train
 # from utils.learning import clustered_learning_predict
+from utils.learning import train_model
+from utils.learning import NN_incremental_train # for NN 
 from utils.learning import calc_loss_RMSE, calc_loss_MAPE
+
 from utils.building_data_IO import prepare_dataset
+from utils.building_data_IO import get_batched_data
+
 from models.ensemble_learning import BoostingModel
 
 class participant(object):
 
-    def __init__(self, ID,  data_source = 'mortar', building_name = 'vm3a' ,\
+    def __init__(self, ID,  data_source = 'mortar', building_name = 'DEFALUT_BUILDING_NAME' ,\
                 model = 'BT', mini_batch_size = 0.4 ):
         # self.aggrate_method = aggrate_method
         # assert aggrate_method.lower() in ['ensemble', 'incremental', 'distributed'] # 这里之前写了个bug 
@@ -59,11 +64,14 @@ class participant(object):
     # the participant train the model 
     # based on the existing global model 
     # when ensemble, use train a weak-estimator directly 
+
     # def local_train( self, model, **parameters)
     def train(self, **parameters): # currently we don't use train(model, parameter), because model is stored in self.model 
+        # prepare training data 
+        X_train, y_train = get_batched_data(self.X, self.y, self.mini_batch_size)
         if self.model in ['RF' ,'rf', "Random Forest", 'random forest']:
-            
-            pass
+            self.weak_estimator = train_model(X_train, y_train, 'rf', parameters)
+            pass 
         elif self.model in ['Ada', 'ada', 'adaboost', 'Adaboost']:
             
             pass
@@ -71,15 +79,31 @@ class participant(object):
             
             pass
         elif self.model in ['NN', 'nn', 'Neural network', 'neural network']: # NN directly update global model 
-            
+            self.__train_NN(X_train, y_train)
             pass
-        #  end training 
+        # end training 
         # fill in the weak estimator 
-
         pass
     
+    
+    def __train_NN(self,X, y,  **parameters):
+        if self.global_model is None :
+            self.global_model = train_model(X, y , 'NN', parameters)
+        else: 
+            self.global_model = NN_incremental_train(X, y , self.global_model, parameters)
+            pass
+        pass
 
+    def __train_BoostingTree(self, X, y, **parameters):
+        y_pred = self.global_model.predict(X)
+        y_resi = BoostingModel.get_residual_error(y, y_pred)
+        self.weak_estimator = train_model(X, y_resi, 'DT', parameters)
+        pass
 
+    def __train_Adaboost(self, X, y,  **parameters):
+        y_pred = self.global_model.predict(X)
+        # https://github.com/px528/AdaboostExample/blob/master/Adaboost.py
+        pass
     
     def set_global_model(self, input_model):
         self.global_model = input_model
