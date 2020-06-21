@@ -23,7 +23,7 @@ You are welcome to cite our research paper:
 
 ```
 @inproceedings{10.1145/3396851.3397717,
-author = {Guo, Yunzhe and Wang, Dan and Vishwanath, Arun and Xu, Cheng and Li, Qi},
+author = {Yunzhe Guo, Dan Wang, Arun Vishwanath, Cheng Xu and Qi Li},
 title = {Towards Federated Learning for HVAC Analytics: A Measurement Study},
 year = {2020},
 isbn = {9781450380096},
