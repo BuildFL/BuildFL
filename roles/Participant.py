@@ -7,6 +7,7 @@ from copy import deepcopy
 # from utils.learning import clustered_learning_predict
 from utils.learning import train_model
 from utils.learning import NN_incremental_train # for NN 
+from utils.learning import train_model_RF
 from utils.learning import calc_loss_RMSE, calc_loss_MAPE
 
 from utils.building_data_IO import prepare_dataset
@@ -70,13 +71,13 @@ class participant(object):
         # prepare training data 
         X_train, y_train = get_batched_data(self.X, self.y, self.mini_batch_size)
         if self.model in ['RF' ,'rf', "Random Forest", 'random forest']:
-            self.weak_estimator = train_model(X_train, y_train, 'rf', parameters)
+            self.weak_estimator = train_model_RF(X_train, y_train, **parameters)
             pass 
         elif self.model in ['Ada', 'ada', 'adaboost', 'Adaboost']:
-            
+            self.__train_Adaboost(X_train, y_train)
             pass
         elif self.model in ['BT','bt', 'Boosting Tree', 'boosting tree']:
-            
+            self.__train_BoostingTree(X_train, y_train)
             pass
         elif self.model in ['NN', 'nn', 'Neural network', 'neural network']: # NN directly update global model 
             self.__train_NN(X_train, y_train)
@@ -88,21 +89,24 @@ class participant(object):
     
     def __train_NN(self,X, y,  **parameters):
         if self.global_model is None :
-            self.global_model = train_model(X, y , 'NN', parameters)
+            self.global_model = train_model(X, y , 'NN', **parameters)
         else: 
-            self.global_model = NN_incremental_train(X, y , self.global_model, parameters)
+            self.global_model = NN_incremental_train(X, y , self.global_model, **parameters)
             pass
         pass
 
     def __train_BoostingTree(self, X, y, **parameters):
         y_pred = self.global_model.predict(X)
         y_resi = BoostingModel.get_residual_error(y, y_pred)
-        self.weak_estimator = train_model(X, y_resi, 'DT', parameters)
+        self.weak_estimator = train_model(X, y_resi, 'DT', ** parameters)
         pass
 
     def __train_Adaboost(self, X, y,  **parameters):
         y_pred = self.global_model.predict(X)
-        # https://github.com/px528/AdaboostExample/blob/master/Adaboost.py
+        y_resi = BoostingModel.get_residual_error(y, y_pred)
+        w  = self.__cal_W( y, y_pred )
+        parameters['sample_weight'] = w 
+        self.weak_estimator = train_model(X, y_resi, 'DT', **parameters)
         pass
     
     def set_global_model(self, input_model):
@@ -116,7 +120,16 @@ class participant(object):
             return deepcopy( self.weak_estimator )
         pass
         
-
+    
+    def __cal_W(self,y,pred, alpha = 1.0 ):
+        # from  https://github.com/px528/AdaboostExample/blob/master/Adaboost.py
+        length = len(y)
+        W = np.ones(length) / length
+        ret=0
+        new_W=[]
+        for i in range(len(y)):
+            new_W.append(W[i]*np.exp(-alpha*y[i]*pred[i]))
+        return np.array(new_W/sum(new_W)).reshape([len(y),1])
     
 
     

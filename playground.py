@@ -27,5 +27,6 @@ e = EnsembleModel()
 rf_model = train_model( X, y, model= 'rf')
 
 nn_model = train_model( X, y, model = 'NN')
-nn_model = NN_incremental_train(X, y , nn_model) # 顺序有一些不一样
+nn_model = NN_incremental_train(X, y , nn_model) # 参数顺序有一些不一样
+
 

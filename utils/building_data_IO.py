@@ -10,10 +10,10 @@ test_Str = '2018-08-29 13:00:00+00:00,60.805,39.435,213.72,0.2,70'
 BUILDING_NAMES_MORTAR = [
     'arc',
     # 'brig',
-    # 'miwf',
+    # 'miwf', 
     'smoa',
     'vm3a',
-    'vmif' # too much corrupted data
+    'vmif' 
 ]
 
 def load_dataset_mortar():
