@@ -109,6 +109,20 @@ class participant(object):
         self.weak_estimator = train_model(X, y_resi, 'DT', **parameters)
         pass
     
+    def evaluate_weak_estimator(self, input_model):
+        # for regression, we use RMSE
+        g = deepcopy(self.global_model)
+        g.add_module(input_model)
+        y_pred = g.predict(self.X)
+        return calc_loss_RMSE(self.y, y_pred)
+        # pass 
+
+    def evaluate(self):
+        y_pred = self.global_model.predict(self.X)
+        res = calc_loss_RMSE(self.y, y_pred)
+        print('Building ID: %d, Evaluation RMSE:%g'%(self.id, res) )
+        pass
+
     def set_global_model(self, input_model):
         self.global_model = input_model
         pass
@@ -121,19 +135,16 @@ class participant(object):
         pass
         
     
-    def __cal_W(self,y,pred, alpha = 1.0 ):
+    def __cal_W(self,y,pred, alpha = 1.0 ): # set alpha = 1.0 in regression 
         # from  https://github.com/px528/AdaboostExample/blob/master/Adaboost.py
         length = len(y)
         W = np.ones(length) / length
-        ret=0
+        # ret=0
         new_W=[]
         for i in range(len(y)):
             new_W.append(W[i]*np.exp(-alpha*y[i]*pred[i]))
-        return np.array(new_W/sum(new_W)).reshape([len(y),1])
-    
-
-    
-
+        res =  np.array(new_W/sum(new_W)).reshape([len(y),1])
+        return res 
 
     pass
 

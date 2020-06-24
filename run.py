@@ -37,5 +37,37 @@ for p in participant_list:
     ps.aggregate_model(weak_estimator)
     pass
 
-# for evaluation TBD
+global_model = ps.global_model
 
+# for evaluation 
+for p in participant_list:
+    p.set_global_model(global_model)
+    p.evaluate()
+    pass
+print('\n')
+
+# iterative 
+TOTAL_EPOCH_CNT = 10
+
+participant_list = []
+ps = parameter_server(model= 'nn')
+
+# initialize Participants 
+for i in range( len(BUILDING_NAMES_MORTAR) ):
+    one_participant = participant(i, DATA_SOURCE, BUILDING_NAMES_MORTAR[i], MODEL)
+    participant_list.append(one_participant) 
+    pass
+
+for i in range( TOTAL_EPOCH_CNT ):
+    p.set_global_model(ps.global_model) 
+    p = random.choice(participant_list) # select the participant 
+    p.train()
+    weak_estimator = p.update()
+    ps.aggregate_model(weak_estimator)
+    pass 
+
+# for evaluation 
+for p in participant_list:
+    p.set_global_model(global_model)
+    p.evaluate()
+    pass

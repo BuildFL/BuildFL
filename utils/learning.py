@@ -155,12 +155,16 @@ def train_model_DT(X_train, y_train, **parameters):
     if 'max_depth' in parameters.keys():
         max_depth = parameters['max_depth']
         pass
+    sample_w = None
+    if 'sample_weight' in parameters.keys():
+        sample_w = parameters['sample_weight']
+        pass
     clf = DecisionTreeRegressor(max_depth= max_depth) 
     # for now we use the default parameter 
     # it acts good 
-    clf.fit(X_train, y_train)
+    clf.fit(X_train, y_train, sample_weight= sample_w)
     return clf
-    pass
+    # pass
 
 def train_model_NN(X_train, y_train, **paramater_dict):
     y_train = deepcopy(y_train)

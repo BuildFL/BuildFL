@@ -219,7 +219,7 @@ def prepare_dataset(data_source, chiller_name_list, **parameters ):
     elif data_source == 'PolyU':
         pass
     else: 
-        # deploy ， 可能还需要从数据库中查询之类的？
+        
         pass
     return X_train, X_test, y_train, y_test
     pass
