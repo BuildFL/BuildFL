@@ -58,16 +58,21 @@ for i in range( len(BUILDING_NAMES_MORTAR) ):
     participant_list.append(one_participant) 
     pass
 
+p = random.choice(participant_list) # select the participant 
+p.train()
+ps.aggregate_model(p.update() )
+    
+
 for i in range( TOTAL_EPOCH_CNT ):
-    p.set_global_model(ps.global_model) 
     p = random.choice(participant_list) # select the participant 
+    p.set_global_model(ps.global_model) 
     p.train()
-    weak_estimator = p.update()
-    ps.aggregate_model(weak_estimator)
+    nn_model = p.update()
+    ps.aggregate_model(nn_model)
     pass 
 
 # for evaluation 
 for p in participant_list:
-    p.set_global_model(global_model)
+    p.set_global_model(ps.global_model)
     p.evaluate()
     pass
